@@ -5,7 +5,7 @@ CREATE TABLE verification_tokens (
     expires_at TIMESTAMPTZ NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     
-    -- Llave foránea estricta hacia users con eliminación en cascada
+    
     CONSTRAINT fk_tokens_user FOREIGN KEY (user_id)
         REFERENCES users(id)
         ON DELETE CASCADE,
