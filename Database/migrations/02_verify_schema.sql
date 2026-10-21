@@ -1,15 +1,21 @@
-CREATE TABLE verification_tokens (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL,
-    token VARCHAR(64) NOT NULL,
-    expires_at TIMESTAMPTZ NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    
-    
-    CONSTRAINT fk_tokens_user FOREIGN KEY (user_id)
-        REFERENCES users(id)
-        ON DELETE CASCADE,
-        
-    -- Token estrictamente único
-    CONSTRAINT uq_tokens_token UNIQUE (token)
+BEGIN; -- Inicia bloque atómico
+
+-- Paso 1: Insertar usuario aprendiz pendiente de verificación
+INSERT INTO users (id, email, password_hash, role, is_verified) 
+VALUES (
+    'b0000000-0000-0000-0000-000000000002',
+    'aprendiz.adso@misena.edu.co',
+    '$2a$12$k9L2m4n6p8q0r2t4v6x8.z0a2c4e6g8i0k2m4n6p8q0r2t4v6x8z0',
+    'user',
+    FALSE
 );
+
+-- Paso 2: Emitir token con expiración calculada a 24 horas exactas
+INSERT INTO verification_tokens (user_id, token, expires_at)
+VALUES (
+    'b0000000-0000-0000-0000-000000000002',
+    encode(gen_random_bytes(32), 'hex'), -- 64 caracteres hexadecimales
+    NOW() + INTERVAL '24 hours'
+);
+
+COMMIT; -- Consolida físicamente en disco
